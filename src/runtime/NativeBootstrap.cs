@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -29,6 +30,9 @@ public sealed class NativeBootstrap : MonoBehaviour
     static long logBytes;
     bool resourcesWaiting, retryResources, recovering;
     static Action<AsyncOperationHandle, Exception> previousExceptionHandler;
+#if UNITY_IOS && !UNITY_EDITOR
+    [DllImport("__Internal")] static extern void NativeTouchControls_Install();
+#endif
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
     public static void Install()
@@ -166,6 +170,9 @@ public sealed class NativeBootstrap : MonoBehaviour
                 }
             if (count != 1) throw new Exception("Expected one original scene Loader, found " + count);
             if (NativePreferences.ResourceLogs) Step("Original Loader activated; original game owns subsequent scenes");
+#if UNITY_IOS && !UNITY_EDITOR
+            NativeTouchControls_Install();
+#endif
         }
         catch (Exception ex) { fatal = ex.ToString(); Debug.LogException(ex); NativePreferences.Show(6, fatal); yield break; }
         // No ongoing bootstrap coroutine when logging is off.

@@ -192,6 +192,7 @@ def prepare(args):
     shutil.copytree(output / 'metadata', data / 'Managed')
     shutil.copytree(resources / 'program/Raw', data / 'Raw')
     write_json(data / 'Raw/native-resource-index.json', contract)
+    shutil.copytree(REPO / 'src/touch', data / 'Raw/native-touch')
     for source in (REPO / 'src/runtime').iterdir():
         if source.suffix in ('.mm', '.h'):
             shutil.copyfile(source, project / 'Libraries' / source.name)

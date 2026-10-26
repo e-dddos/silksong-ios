@@ -1,99 +1,98 @@
 # Silksong iPadOS
 
-简体中文 · [English](README_EN.md)
+An unofficial iOS build tool for *Hollow Knight: Silksong*.
 
-《Hollow Knight: Silksong》非官方 iOS 构建工具。
+Unity IL2CPP converts the IL code in the game's original managed assemblies into C++, which is then compiled into ARM64 machine code and runs with Unity's native iOS runtime.
 
-与模拟器或兼容层等方案不同，我们可以直接通过 Unity IL2CPP 将游戏原版的托管程序集的 IL 中间代码转换为 C++，再编译生成 ARM64 机器码，配合 Unity 的 iOS 原生运行时执行。
+Rendering uses the native Metal backend, with no instruction emulation or additional graphics API translation and almost no additional performance overhead.
 
-渲染侧使用原生 Metal 后端，无需模拟指令或额外的图形 API 转译层，几乎没有额外性能损失。
+This project does not include any official game assets. You need to build from your own purchased copy of the macOS game.
 
-本项目不包含任何官方游戏资源，你需要从你所购买的 macOS 版本游戏包体开始编译。
+## Getting Started
 
-## 开始构建
+You need a **Mac with Apple Silicon or Intel**. Follow the [build guide](#build-your-own-ipa) to convert game resources, generate the project, compile the IPA, and sign and install it on your iPad.
 
-你需要一台 **Apple Silicon Mac**。按[构建教程](#构建自己的-ipa)在 Mac 上完成游戏资源转换、工程生成、IPA 编译和签名安装。
-
-游戏内操作仅部分支持触屏，你需要外接键盘或手柄游玩。
+Play with the on-screen [touch controls](#touch-controls), an external keyboard, or a controller.
 
 ```text
-python3 build.py resources     转换资源
-python3 build.py prepare       生成 iOS 工程
-python3 build.py native        编译未签名 IPA
-python3 build.py resource-zip   打包资源 ZIP
+python3 build.py resources     Convert resources
+python3 build.py prepare       Generate the iOS project
+python3 build.py native        Build an unsigned IPA
+python3 build.py resource-zip   Package resources as a ZIP
 ```
 
-运行对应命令的 `--help` 查看参数。
+Run any command with `--help` to see its options.
 
-## 功能
+## Features
 
-- iOS 手柄、外接键盘与鼠标。
-- 原版画质菜单、帧率选项和 iPad 画幅适配。
-- 修复了部分动画错误，通用 Animator 绑定修复。
-- 在系统设置中配置日志记录和 Metal 性能面板选项。
+- On-screen touch controls with a layout editor.
+- iOS controller, external keyboard, and mouse support.
+- Original graphics and frame rate settings, with support for the iPad's aspect ratio.
+- General Animator binding fixes for animation issues.
+- Logging and Metal performance overlay options in system Settings.
 
-[存档与程序更新](#存档与程序更新) · [支持与测试范围](#支持与测试范围)
+[Saves and App Updates](#saves-and-app-updates) · [Support and Testing](#support-and-testing)
 
-## 声明
+## Notice
 
-**本项目完全免费，请支持正版并购买原游戏。**
+**This project is completely free. Please support the developers and buy the original game.**
 
-请勿倒卖或购买IPA包、付费群或测试资格等，如你已付费购买请立即退款。
+Do not sell or pay for IPA packages, paid groups, testing access, or similar offers. If you have paid for any of these, request a refund immediately.
 
-## 依赖与来源
+## Dependencies and Sources
 
-| 项目 | 获取方式 |
+| Item | Where to get it |
 | --- | --- |
-| Hollow Knight: Silksong | 在 Steam 购买并下载 macOS 版 |
-| Python 3.12 | 使用你喜欢的方式安装 |
-| Unity 6000.0.50f1 | 通过 Unity Hub 安装编辑器和 iOS Build Support |
-| Xcode | 安装后打开一次，完成组件安装 |
-| Unity Input System 1.14.2 | 通过 Unity Package Manager 安装，或下载[官方包](https://download.packages.unity.com/com.unity.inputsystem/-/com.unity.inputsystem-1.14.2.tgz) |
-| UnityPy、astc-encoder-py、texture2ddecoder、Pillow 等 | `python3 -m pip install -r requirements.txt` |
+| Hollow Knight: Silksong | Purchase on Steam and download the macOS version |
+| Python 3.12 | Install using your preferred method |
+| Unity 6000.0.50f1 | Install the Editor and iOS Build Support through Unity Hub |
+| Xcode | Open it once after installation to finish installing its components |
+| Unity Input System 1.14.2 | Install through Unity Package Manager, or download the [official package](https://download.packages.unity.com/com.unity.inputsystem/-/com.unity.inputsystem-1.14.2.tgz) |
+| UnityPy, astc-encoder-py, texture2ddecoder, Pillow, etc. | `python3 -m pip install -r requirements.txt` |
 | xcodeproj 1.27.0 | `gem install xcodeproj -v 1.27.0 --no-document --user-install` |
 
-仓库代码采用 [MIT](LICENSE)。
+The repository's code is licensed under [MIT](LICENSE).
 
-## 构建自己的 IPA
+## Build Your Own IPA
 
-以下步骤需要在 **Apple Silicon Mac** 上完成。
+Complete the following steps on a **Mac with Apple Silicon or Intel**. Building on Intel takes longer.
 
-游戏文件使用 Steam macOS 版 **1.0.30000**，构建使用 Unity **6000.0.50f1**。
+Use the Steam macOS release **1.0.30000** and Unity **6000.0.50f1**.
 
-### 获取游戏文件
+### Get the Game Files
 
-打开 Steam，登录已购买游戏的账号。在终端打开 Steam 控制台：
+Open Steam and sign in to an account that owns the game. Open the Steam console from Terminal:
 
 ```sh
 open 'steam://open/console'
 ```
 
-然后在 Steam 控制台执行：
+Then run this in the Steam console:
 
 ```text
 download_depot 1030300 1030302 4136280015582261500
 ```
 
-等待控制台提示下载完成，目录通常为：
+Wait for the console to report that the download has finished. The app is usually saved to:
 
 ```text
 ~/Library/Application Support/Steam/steamapps/content/app_1030300/depot_1030302/Hollow Knight Silksong.app
 ```
 
-保留完整 `.app` 目录，不要只复制其中的 Data 文件夹。
+Keep the entire `.app` directory, not just its Data folder.
 
-### 准备工具和输入
+### Prepare the Tools
 
-1. Python 3.12。
-2. 通过 Unity Hub 安装 Apple Silicon 版 Unity 6000.0.50f1，并勾选 iOS Build Support。
-3. 安装并打开 Xcode，完成组件安装。本项目原生编译验证环境使用了 Xcode 26.6。
-4. 在终端安装 Ruby 依赖：`gem install xcodeproj -v 1.27.0 --no-document --user-install`。
+1. Install Python 3.12.
+2. Install Unity 6000.0.50f1 for your Mac's processor (Apple Silicon or Intel) through Unity Hub, with iOS Build Support selected.
+3. Install and open Xcode to finish installing its components. The native build was tested with Xcode 26.6.
+4. Install the Ruby dependency in Terminal: `gem install xcodeproj -v 1.27.0 --no-document --user-install`.
 
-建议预留至少 20 GB 构建空间。
+Allow at least 20 GB of free disk space for the build.
 
-### 安装构建依赖
+### Install Build Dependencies
 
-在仓库目录打开终端，创建并启用 Python 环境：
+Open Terminal in the repository directory, then create and activate a Python environment:
 
 ```sh
 python3.12 -m venv .venv
@@ -101,7 +100,7 @@ source .venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-下载并解压官方 Input System 1.14.2：
+Download and extract the official Input System 1.14.2 package:
 
 ```sh
 buildRoot="$HOME/SilksongBuild"
@@ -110,11 +109,11 @@ curl -fL 'https://download.packages.unity.com/com.unity.inputsystem/-/com.unity.
 tar -xzf "$buildRoot/input-system-1.14.2.tgz" -C "$buildRoot/input-system-1.14.2"
 ```
 
-后续命令在同一个终端中执行。
+Run the remaining commands in the same Terminal session.
 
-### 转换资源、生成工程
+### Convert Resources and Generate the Project
 
-下面使用 Steam 和 Unity Hub 的默认路径，按实际安装位置修改：
+These commands use the default Steam and Unity Hub paths. Adjust them to match your installation:
 
 ```sh
 gameData="$HOME/Library/Application Support/Steam/steamapps/content/app_1030300/depot_1030302/Hollow Knight Silksong.app/Contents/Resources/Data"
@@ -127,52 +126,52 @@ python3 build.py resources --game-data "$gameData" --output "$resourceOutput" --
 python3 build.py prepare --game-data "$gameData" --unity-data "$unityData" --input-system "$inputSystem" --resources "$resourceOutput" --output "$nativeOutput" --bundle-id 'org.example.silksong.personal'
 ```
 
-资源转换中断后，运行同一命令即可继续；加 `--refresh` 可强制重新转换。
+If resource conversion is interrupted, run the same command to resume. Add `--refresh` to convert everything again.
 
-`prepare` 需要一个尚不存在的输出目录。重新生成工程时，换一个 `nativeOutput` 路径。
+`prepare` requires an output directory that does not already exist. Choose a new `nativeOutput` path when regenerating the project.
 
-默认版本为 0.8.3、构建号 40，可用 `--version` 和 `--build-number` 修改。覆盖更新时，沿用原来的 `--bundle-id`。
+The default version is 0.8.3, build 40. Change these with `--version` and `--build-number`. Keep the same `--bundle-id` when updating an existing installation.
 
-### 编译 IPA
+### Build the IPA
 
-工程生成完成后，继续执行：
+Once the project is ready, run:
 
 ```sh
 python3 build.py native --work "$nativeOutput"
 ```
 
-IPA 和日志位于 `$buildRoot` 下：
+The IPA and logs are under `$buildRoot`:
 
 ```text
 native/output/SilksongNative-0.8.3-unsigned.ipa
 native/logs/
 ```
 
-再次运行 `native` 时会复用该目录中的编译缓存。
+Running `native` again reuses the build cache in that directory. The cache only works in the directory where it was created, so do not copy it into a new output directory.
 
-### 签名安装
+### Sign and Install
 
-生成的 IPA 未签名，需要使用 [AltStore](https://altstore.io/) 等侧载工具安装。以 [Sideloadly](https://sideloadly.io/) 为例：
+The generated IPA is unsigned. Install it with a sideloading tool such as [AltStore](https://altstore.io/). Using [Sideloadly](https://sideloadly.io/) as an example:
 
-1. 安装 Sideloadly。
-2. 用 USB 连接并解锁 iPad，选择「信任此电脑」。在 Sideloadly 中选择设备，拖入 IPA。
-3. 使用自己的 Apple ID 签名，点击 Start，按提示完成安装。
-4. 如系统提示，在「设置 → 通用 → VPN 与设备管理」信任开发者，并在「隐私与安全性 → 开发者模式」中开启开发者模式。
+1. Install Sideloadly.
+2. Connect your iPad over USB, unlock it, and select “Trust This Computer.” Select the device in Sideloadly and drag in the IPA.
+3. Sign with your own Apple ID, click Start, and follow the installation prompts.
+4. If prompted, trust the developer under Settings → General → VPN & Device Management, and enable Developer Mode under Privacy & Security → Developer Mode.
 
-免费账号签名通常有效 7 天，可重新签名或配置自动续签。覆盖安装时使用相同 Apple ID 和应用标识，保留资源与存档。详见 [Sideloadly FAQ](https://sideloadly.io/faq)。
+Free account signatures usually last 7 days. You can sign the app again or set up automatic renewal. Use the same Apple ID and bundle identifier when installing an update to keep your resources and saves. See the [Sideloadly FAQ](https://sideloadly.io/faq).
 
-### 导入资源
+### Import Resources
 
-资源转换会生成 `$resourceOutput/SilksongResources-v1` 文件夹，包含场景、纹理、音乐音效、动画、字体和 UI 等数据，展开约 2.59 GB。可直接复制文件夹，也可打包为约 2.35 GB 的 ZIP：
+Resource conversion creates `$resourceOutput/SilksongResources-v1`, containing scenes, textures, music, sound effects, animations, fonts, UI, and other data. The folder is about 2.59 GB. Copy it directly, or package it as a ZIP of about 2.35 GB:
 
 ```sh
 python3 build.py resource-zip --resources "$resourceOutput" --output "$buildRoot/SilksongResources-v1.zip"
 ```
 
-1. 安装 IPA 后打开一次应用。
-2. 用 USB 连接 Mac 和 iPad，将资源 ZIP 拖入「空洞骑士：丝之歌」的应用文件夹。
-3. 在 iPad「文件」中点按 ZIP 解压，把 `SilksongResources-v1` 文件夹放进「我的 iPad → 空洞骑士：丝之歌」。也可以直接复制已解压的文件夹。
-4. 确认没有套两层同名目录，正确结构如下。导入完成后，从后台关闭并重新打开应用。
+1. Open the app once after installing the IPA.
+2. Connect your Mac and iPad over USB, then drag the resource ZIP into the Hollow Knight: Silksong app folder.
+3. Tap the ZIP in Files on your iPad to extract it. Place the `SilksongResources-v1` folder under On My iPad → Hollow Knight: Silksong. You can also copy the extracted folder directly.
+4. Make sure the folder is not nested inside another folder with the same name. The correct structure is shown below. After importing, close the app from the app switcher and reopen it.
 
 ```text
 Documents/
@@ -182,94 +181,105 @@ Documents/
     aa/StandaloneOSX/...
 ```
 
-### 性能与诊断
+### Performance and Diagnostics
 
-安装后，在 iPadOS「设置」中打开「空洞骑士：丝之歌」（iPadOS 18 及以上位于「App」中），即可调整以下选项；从后台关闭再打开应用后生效：
+After installation, open Hollow Knight: Silksong in iPadOS Settings (under Apps on iPadOS 18 and later) to adjust these options. Close the app from the app switcher and reopen it for changes to take effect:
 
-- 显示声明：开启时每次启动游戏会显示声明。
-- 下次启动重新检查资源：导入新资源或排查问题时使用。
-- 诊断日志：记录资源加载等日志到文件。
-- 性能面板：启用帧率、帧时间与 GPU 面板。
-- 显示启动详细信息：显示屏幕上的诊断文字。
+- Show Notice: show the notice every time the game starts.
+- Check Resources on Next Launch: use after importing new resources or when troubleshooting.
+- Diagnostic Logs: write resource loading and other logs to a file.
+- Performance Overlay: show frame rate, frame time, and GPU time.
+- Show Startup Details: display diagnostic text on screen.
 
-默认会显示声明。在声明页将「下次启动时」设为「直接进入游戏」即可跳过声明。日志和性能面板默认关闭。
+The notice is shown by default. Set “On Next Launch” to “Go Straight to Game” on the notice page to skip it. Logs and the performance overlay are off by default.
 
-排查问题时开启「诊断日志」，重启并复现问题，再从应用 Documents 导出 `native.log`。
+To troubleshoot, enable Diagnostic Logs, restart the app, reproduce the issue, and export `native.log` from the app's Documents folder.
 
-构建失败时查看输出目录中的日志。补丁目标不匹配时，先检查游戏和 Unity 版本。
+If a build fails, check the logs in the output directory. If a patch target does not match, check the game and Unity versions first.
 
-## 存档与程序更新
+### Touch Controls
 
-### 存档位置
+The on-screen controls appear once the game starts. Tap the Options button at the top to switch between Menu and Play controls, choose a right-hand, left-hand, or compact layout, hide the controls when using a controller, or customize the position, size, and opacity of each button.
 
-存档位于应用的 `Documents/default/`，在 iPad「文件 → 我的 iPad → 空洞骑士：丝之歌 → default」中可以找到。`user1.dat` 到 `user4.dat` 分别对应第一到第四栏存档，你可以使用任意存档修改工具进行修改。
+The buttons press the game's default keyboard keys, so keep the default keyboard bindings in the game's settings. The button artwork in `src/touch/` comes from [hollow-games-ios-builder](https://github.com/huzaifahshahid71-ops/hollow-games-ios-builder) and is not covered by the MIT license; see `src/touch/CONTROL-ARTWORK-NOTICE.md`.
 
-备份或替换存档前，先从后台彻底关闭游戏。备份所有存档时复制整个 `default` 文件夹，恢复时放回原位置。
+## Saves and App Updates
 
-### 更新程序
+### Save Location
 
-使用相同签名账号和应用标识覆盖安装 IPA，会保留存档和资源。资源一般无需重新导入。
+Saves are stored in the app's `Documents/default/` folder. On your iPad, open Files → On My iPad → Hollow Knight: Silksong → default. Files `user1.dat` through `user4.dat` correspond to save slots 1 through 4. You can edit them with a save editor.
 
-更换签名账号或应用标识可能无法覆盖原应用。先备份存档和资源，若需重新安装，再手动迁移。
+Close the game completely from the app switcher before backing up or replacing saves. Copy the entire `default` folder to back up all slots, and put it back in the same location to restore them.
 
-**更新时不要先卸载应用，卸载会删除游戏资源和存档。**
+### Update the App
 
-## 支持与测试范围
+Install the new IPA over the existing app using the same signing account and bundle identifier to keep your saves and resources. Resources usually do not need to be imported again.
 
-当前为 **0.8.3 / build 40 测试版**。
+Changing the signing account or bundle identifier may prevent an update from replacing the existing app. Back up your saves and resources first, then transfer them manually if a fresh installation is needed.
 
-| 项目 | 当前范围 |
+**Do not uninstall the app before updating. Uninstalling deletes its game resources and saves.**
+
+## Support and Testing
+
+Current release: **0.8.3 / build 40 test version**.
+
+| Item | Current scope |
 | --- | --- |
-| 游戏文件 | Steam macOS 版 1.0.30000 |
-| 构建环境 | Apple Silicon Mac、Unity 6000.0.50f1、Python 3.12、Xcode |
-| 系统要求 | 构建最低目标为 iOS / iPadOS 15.0 |
-| 实测设备 | iPad Pro 11 英寸（2021，M1） |
-| iPadOS 16 实测 | iPad（M2，8 GB），使用按 [PR #1](https://github.com/Souls-R/silksong-ipados/pull/1) 重新编译的 IPA 测试通过 |
-| 操作方式 | 游戏内使用外接键盘或手柄，支持鼠标按键绑定；部分支持触控 |
-| 启动页与应用名称 | 简体中文、繁体中文、英文，跟随系统语言 |
+| Game files | Steam macOS release 1.0.30000 |
+| Build environment | Apple Silicon or Intel Mac, Unity 6000.0.50f1, Python 3.12, Xcode |
+| System requirements | Minimum build target: iOS / iPadOS 15.0 |
+| Tested devices | iPad Pro 11-inch (2021, M1); iPad Pro 12.9-inch (3rd generation, A12X) |
+| iPadOS 16 testing | iPad with M2 and 8 GB RAM; reported working with an IPA rebuilt from [PR #1](https://github.com/Souls-R/silksong-ipados/pull/1) |
+| Controls | On-screen touch controls, external keyboard, or controller, with mouse button binding |
+| Startup UI and app name | Simplified Chinese, Traditional Chinese, and English, following the system language |
 
-使用鼠标前，请关闭 iPad「设置 → 辅助功能 → 触控 → 辅助触控」，避免左键被系统转换为触屏点击。
+Before using a mouse, turn off **Settings → Accessibility → Touch → AssistiveTouch** on your iPad to prevent left clicks from being converted into screen taps.
 
-## 更新说明
+## Release Notes
+
+### Unreleased
+
+- Added on-screen touch controls, ported from hollow-games-ios-builder, with Menu/Play modes and a layout editor.
+- Added support for building on Intel Macs.
 
 ### 0.8.3
 
-- 修复 Switch 手柄识别和减号背包输入，菜单使用 A 确认、B 返回；保留原游戏改键逻辑。
-- 修复通用 iOS 手柄控件与背包绑定不一致的问题，收紧名称匹配规则，减少第三方手柄误分类。
-- 修正 DualSense 的 PS5 分类；已有 PS5 改键保持不变，首次使用 PS5 配置时沿用原 PS4 改键。
-- 原资源包继续复用。手柄输入链路已通过 iPad 模拟设备回放，真实 Switch / 第三方手柄仍需实测。
+- Fixed Switch controller detection and Minus inventory input, with A to confirm and B to go back; original rebinding remains supported.
+- Fixed mismatches between generic iOS controller controls and inventory bindings; narrowed name matching to reduce third-party misclassification.
+- Corrected DualSense classification to PS5. Existing PS5 bindings are retained; a missing PS5 profile inherits the previous PS4 bindings.
+- Existing resource packs remain compatible. Controller input paths passed replay tests on an iPad; physical Switch and third-party controllers still need testing.
 
 ### 0.8.2
 
-- 最低部署目标降至 iOS / iPadOS 15.0；15.5 用户反馈运行正常。原资源包继续复用。
+- Lowered the minimum deployment target to iOS / iPadOS 15.0; reported working on 15.5. Existing resource packs remain compatible.
 
 ### 0.8.1
 
-- 切换应用或失去焦点时自动请求暂停，返回后保持暂停菜单，由玩家手动继续。
-- 重复通知不会恢复游戏；已经打开的暂停菜单或设置子菜单保持原状。
+- Automatically requests a pause when switching apps or losing focus. The pause menu stays open on return until the player resumes manually.
+- Repeated notifications do not resume gameplay; an existing pause menu or settings submenu stays open.
 
 ### 0.8.0
 
-- 修复 DualSense（PS5）手柄触摸板按下与松开输入，保留游戏原有的输入和按键绑定逻辑。
+- Fixed DualSense (PS5) touchpad button press and release input, preserving the game's original input and button binding logic.
 
 ### 0.7.9
 
-- 最低部署目标降至 iOS / iPadOS 16.0。
-- 支持鼠标菜单点击和游戏内按键绑定。
-- 修复鼠标松开事件丢失、绑定后误触菜单的问题。
-- 修复绑定提示的中文字体显示。
+- Lowered the minimum deployment target to iOS / iPadOS 16.0.
+- Added mouse menu clicks and in-game button binding.
+- Fixed missed mouse button releases and unintended menu clicks after rebinding.
+- Fixed the Chinese font used by the binding prompt.
 
 ### 0.7.4
 
-- 修复启动时短暂白屏的问题。
-- 适配手柄震动，保留原游戏的震动开关和强度设置。
+- Fixed the brief white screen at startup.
+- Added controller rumble support, preserving the original game's vibration toggle and intensity settings.
 
 ### 0.7.2
 
-- 新增原版风格的启动声明，可选择下次直接进入游戏。
-- 使用原版图标，应用名称和启动页支持简中、繁中、英文。
-- 系统设置新增声明、重新检查资源、诊断日志、性能面板和启动详细信息开关。
+- Added a startup notice styled after the original game, with an option to go straight to the game on future launches.
+- Uses the original app icon. The app name and startup UI support Simplified Chinese, Traditional Chinese, and English.
+- Added system Settings options for the notice, resource checks, diagnostic logs, performance overlay, and startup details.
 
-### 反馈
+### Feedback
 
-反馈时请提供设备、系统和版本、复现步骤，必要时附上诊断日志。
+Include your device, OS and app versions, and steps to reproduce the issue. Attach diagnostic logs when needed.
