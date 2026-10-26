@@ -3,7 +3,6 @@
 !/.gitignore
 !/.gitattributes
 !/README.md
-!/README_EN.md
 !/LICENSE
 !/.github/
 /.github/*
@@ -23,6 +22,9 @@
 !/src/runtime/*.h
 !/src/launch/
 !/src/launch/strings.json
+!/src/touch/
+!/src/touch/*.png
+!/src/touch/CONTROL-ARTWORK-NOTICE.md
 !/tests/
 !/tests/*.py
 !/tests/*.cs

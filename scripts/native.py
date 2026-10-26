@@ -52,8 +52,8 @@ def inspect_ipa(ipa, manifest):
 
 
 def build_native(args):
-    if sys.platform != 'darwin' or platform.machine() != 'arm64':
-        raise ValueError('Native compilation requires an Apple Silicon Mac with Xcode installed')
+    if sys.platform != 'darwin':
+        raise ValueError('Native compilation requires a Mac with Xcode installed')
     work = output_directory(args.work)
     manifest = read_json(work / 'build.json')
     if manifest.get('schema') != 1 or manifest.get('unity') != UNITY_VERSION or not manifest.get('prepared'):
@@ -69,7 +69,8 @@ def build_native(args):
         logs / 'configure-xcode-preflight.log')
     run(['xcodebuild', '-list', '-project', project / 'Unity-iPhone.xcodeproj'],
         logs / 'xcode-project-preflight.log', cwd=work)
-    deploy = il2cpp / 'build/deploy_arm64'
+    # The IL2CPP host tool must match this Mac's CPU (arm64 or x86_64).
+    deploy = il2cpp / ('build/deploy_' + platform.machine())
     if not (deploy / 'il2cpp').is_file():
         deploy = il2cpp / 'build/deploy'
     require_files(deploy, ['il2cpp'])
