@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import os
+import platform
 import plistlib
 import re
 import shutil
@@ -168,7 +169,9 @@ def prepare(args):
     compile_helper(unity, package, managed, output, args.diagnostics)
     project = output / 'project'
     shutil.copytree(ios / 'Trampoline', project, ignore=shutil.ignore_patterns('*sim*', '*-dev.a'))
-    shutil.copytree(ios / 'il2cpp', output / 'IL2CPP', ignore=shutil.ignore_patterns('deploy_x86_64', '*.pdb'))
+    # Keep only the IL2CPP host tool for this Mac's CPU.
+    other_host = 'deploy_arm64' if platform.machine() == 'x86_64' else 'deploy_x86_64'
+    shutil.copytree(ios / 'il2cpp', output / 'IL2CPP', ignore=shutil.ignore_patterns(other_host, '*.pdb'))
     cpp = project / 'Il2CppOutput'
     command = [tool(unity, 'il2cpp/build/deploy/il2cpp'), '--convert-to-cpp', '--platform=iOS',
                '--architecture=arm64', '--dotnetprofile=unityaot-macos', '--static-lib-il2-cpp',
